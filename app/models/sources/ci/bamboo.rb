@@ -8,7 +8,9 @@ module Sources
         result = request_build_status(server_url, project)
         {
           :label => result["results"]["result"][0]["planName"],
-          :current_status => parse_status(result["results"]["result"][0]["lifeCycleState"])
+          :current_status => parse_status(result["results"]["result"][0]["lifeCycleState"]),
+          :last_build_time => Time.now,
+          :last_build_status => 0
         }
       end
 
