@@ -5,16 +5,20 @@ module Sources
     class Bamboo < Sources::Ci::Base
 
       def get(server_url, project, options = {})
-        result = request_build_status(server_url, project)
+        response = request_build_status(server_url, project)
         {
-          :label => result["results"]["result"][0]["planName"],
-          :current_status => parse_status(result["results"]["result"][0]["lifeCycleState"]),
+          :label => build_result(response)["planName"],
+          :current_status => parse_status(build_result(response)["lifeCycleState"]),
           :last_build_time => Time.now,
-          :last_build_status => parse_build_status(result["results"]["result"][0]["state"])
+          :last_build_status => parse_build_status(build_result(response)["state"])
         }
       end
 
       private
+
+      def build_result(response)
+        response["results"]["result"][0]
+      end
 
       def request_build_status(server_url, project)
         url = "#{server_url}rest/api/latest/result/#{project}.json?expand=results[0].result"
