@@ -34,4 +34,25 @@ describe Sources::Ci::Bamboo do
     end
   end
 
+  describe "build_status" do
+
+    it "should return 0 for successful" do
+      hash_response = {"results" => {"result" => [{"state" => "Successful"}]}}
+      ::HttpService.expects(:request).with(@expected_url).returns(hash_response)
+      @ci.get(@server_url, @project)[:last_build_status].should == 0
+    end
+
+    it "should return 1 for failure" do
+      hash_response = {"results" => {"result" => [{"state" => "Failed"}]}}
+      ::HttpService.expects(:request).with(@expected_url).returns(hash_response)
+      @ci.get(@server_url, @project)[:last_build_status].should == 1 
+    end
+
+    it "should returns -1 otherwise" do
+      hash_response = {"results" => {"result" => [{"state" => "CRAZY"}]}}
+      ::HttpService.expects(:request).with(@expected_url).returns(hash_response)
+      @ci.get(@server_url, @project)[:last_build_status].should == -1 
+    end
+  end
+
 end

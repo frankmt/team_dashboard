@@ -10,7 +10,7 @@ module Sources
           :label => result["results"]["result"][0]["planName"],
           :current_status => parse_status(result["results"]["result"][0]["lifeCycleState"]),
           :last_build_time => Time.now,
-          :last_build_status => 0
+          :last_build_status => parse_build_status(result["results"]["result"][0]["state"])
         }
       end
 
@@ -25,6 +25,18 @@ module Sources
       def parse_status(result)
         result == "Finished" ? 0 : -1
       end
+      
+      def parse_build_status(result)
+        case result
+        when /Successful/
+          0
+        when /Failed/
+          1
+        else
+          -1
+        end
+      end
+      
     end
       
   end
