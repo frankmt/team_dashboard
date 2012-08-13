@@ -6,8 +6,10 @@ module Sources
 
       def get(server_url, project, options = {})
         result = request_build_status(server_url, project)
-        puts result
-        {:label => result["results"]["result"][0]["planName"]}
+        {
+          :label => result["results"]["result"][0]["planName"],
+          :current_status => parse_status(result["results"]["result"][0]["lifeCycleState"])
+        }
       end
 
       private
@@ -18,8 +20,10 @@ module Sources
         JSON.parse(::HttpService.request(url))
       end
 
-      
-
+      def parse_status(result)
+        result == "Finished" ? 0 : -1
+      end
     end
+      
   end
 end
