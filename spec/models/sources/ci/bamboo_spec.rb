@@ -12,10 +12,10 @@ describe Sources::Ci::Bamboo do
     
     it "should return project name in the label" do
       expected_url = "http://localhost/rest/api/latest/result/test-build.json?expand=results[0].result"
-      json_response = "{\"results\":{\"result\":[\"planName\":\"reaxchange-deploy\",\"projectName\":\"REAXchange\",\"lifeCycleState\":\"Finished\"}"
+      json_response = %{{"results":{"result":[{"planName":"planName","projectName":"projName","state":"Successful","number":200}]}}}
 
-      ::HttpService.stub(:request).with(expected_url).and_return(json_response)
-      @ci.get(@server_url, @project).label.should == "planName"
+      ::HttpService.expects(:request).with(expected_url).returns(json_response)
+      @ci.get(@server_url, @project)[:label].should == "planName"
     end
 
   end
