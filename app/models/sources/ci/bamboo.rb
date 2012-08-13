@@ -19,7 +19,7 @@ module Sources
       def request_build_status(server_url, project)
         url = "#{server_url}rest/api/latest/result/#{project}.json?expand=results[0].result"
         Rails.logger.debug("Requesting from #{url} ...")
-        JSON.parse(::HttpService.request(url))
+        ::HttpService.request(url)
       end
 
       def parse_status(result)
