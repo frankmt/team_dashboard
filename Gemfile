@@ -10,7 +10,7 @@ gem "handlebars_assets"
 
 gem 'mysql2'
 
-gem 'thin'
+gem 'unicorn'
 gem 'foreman'
 gem 'faraday'
 gem 'faraday_middleware'
