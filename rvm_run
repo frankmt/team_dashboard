@@ -1,0 +1,11 @@
+#!/bin/sh
+
+WHEREAMI=$(cd `dirname $0`; pwd)
+
+if [[ -s ~/.rvm/scripts/rvm ]]; then
+    . ~/.rvm/scripts/rvm
+fi
+
+. $WHEREAMI/.rvmrc
+
+exec "$@"
