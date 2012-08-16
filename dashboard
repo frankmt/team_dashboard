@@ -1,0 +1,22 @@
+#!/bin/bash
+
+export GRAPHITE_URL='http://dashboard.eqx.realestate.com.au:8888/'
+
+WHEREAMI=$(cd `dirname $0`; pwd)
+PID_FILE="$WHEREAMI"/tmp/unicorn.pid
+SOCK_FILE="$WHEREAMI"/tmp/unicorn.sock
+
+case "$1" in
+  start)
+    [ -s ~/.rvm/scripts/rvm ] && source ~/.rvm/scripts/rvm
+    source $WHEREAMI/.rvmrc
+    GEMFILE=$WHEREAMI/Gemfile bundle exec unicorn --env production --config $WHEREAMI/config/unicorn.rb -D
+    ;;
+  stop)
+    kill -TERM $PID_FILE
+    rm -f $PID_FILE $SOCK_FILE
+    ;;
+  status)
+    kill -0 $PID_FILE && echo 'Dashboard running!' || echo 'Dashboard not running!'
+    ;;
+esac
