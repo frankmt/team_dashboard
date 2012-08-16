@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>rea.team_dashboard</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <false/>
+    <key>UserName</key>
+    <string>monitor</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/User/monitor/team_dashboard/rvm_run</string>
+        <string>bundle</string>
+        <string>exec</string>
+        <string>unicorn</string>
+        <string>--env</string>
+        <string>production</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/User/monitor/team_dashboard</string>
+  </dict>
+</plist>
