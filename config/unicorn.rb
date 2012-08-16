@@ -6,6 +6,8 @@ working_directory base_path + '/tmp'
 preload_app true
 timeout 60
 
+listen base_path + '/tmp/unicorn.sock', :backlog => 1024
+
 pid base_path + '/tmp/unicorn.pid'
 
 stderr_path base_path + '/log/unicorn.stderr.log'

@@ -1,1 +1,1 @@
-web: bundle exec unicorn --env production --listen tmp/team_dashboard.sock
+web: bundle exec unicorn --env production
