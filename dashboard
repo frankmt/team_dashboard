@@ -13,10 +13,7 @@ case "$1" in
     GEMFILE=$WHEREAMI/Gemfile bundle exec unicorn --env production --config $WHEREAMI/config/unicorn.rb -D
     ;;
   stop)
-    kill -TERM $PID_FILE
+    [ -e "$PID_FILE" ] && kill -TERM `cat $PID_FILE`
     rm -f $PID_FILE $SOCK_FILE
-    ;;
-  status)
-    kill -0 $PID_FILE && echo 'Dashboard running!' || echo 'Dashboard not running!'
     ;;
 esac
