@@ -7,12 +7,11 @@
       this.from = options.from;
       this.to = options.to;
       this.source = options.source;
-      this.targetsArray = (this.targets || "").split(',');
       this.aggregate_function = options.aggregate_function;
     },
 
     buildTargetsParams: function() {
-      return _.map(this.targetsArray, function(target) {
+      return _.map(this.targets, function(target) {
         return "targets[]=" + encodeURIComponent(target);
       }).join('&');
     },

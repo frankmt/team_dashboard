@@ -117,7 +117,10 @@
             if (formValues.source === "http_proxy" && value.length === 0) { return err; }
           }]
         },
-        targets: { title: "Targets", type: 'Text', validators: [ function checkTargets(value, formValues) {
+        targets: {
+          title: "Targets",
+          type: 'List',
+          validators: [ function checkTargets(value, formValues) {
             if (formValues.source !== "http_proxy" && value.length === 0) { return err; }
           }
         ]}
