@@ -21,3 +21,18 @@ RSpec.configure do |config|
   # rspec-rails.
   config.infer_base_class_for_anonymous_controllers = false
 end
+
+def in_utc(&block)
+  have_tz = ENV.include?('TZ')
+  last_tz = ENV['TZ']
+  begin
+    ENV['TZ'] = 'UTC'
+    block.call
+  ensure
+    if have_tz
+      ENV['TZ'] = last_tz
+    else
+      ENV.delete('TZ')
+    end
+  end
+end
