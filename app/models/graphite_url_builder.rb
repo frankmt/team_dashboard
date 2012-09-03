@@ -5,8 +5,7 @@ class GraphiteUrlBuilder
   end
 
   def datapoints_url(targets, from, to)
-    params = { :target => Array(targets), :format => "json", :from => format(from), :until => format(to) }
-    { :url => "#{@base_url}/render", :params => params }
+    "#{@base_url}/render?#{target_params(targets)}&format=json&from=#{CGI.escape(format(from))}&until=#{CGI.escape(format(to))}"
   end
 
   def metrics_url
@@ -14,8 +13,12 @@ class GraphiteUrlBuilder
   end
 
   def format(timestamp)
-    time = Time.at(timestamp).utc
+    time = Time.at(timestamp)
     time.strftime("%H:%M_%Y%m%d")
+  end
+
+  def target_params(targets)
+    Array(targets).map { |t| "target=#{t}" }.join('&')
   end
 
 end

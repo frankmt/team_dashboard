@@ -10,7 +10,7 @@
     },
 
     initialize: function() {
-      _.bindAll(this, "render", "sourceChanged", "updateFieldVisibility", "toggleFields");
+      _.bindAll(this, "render", "sourceChanged");
     },
 
     validate: function() {
@@ -20,9 +20,16 @@
     sourceChanged: function(event) {
       var value  = this.$(event.target).val(),
           id     = this.$(event.target).attr("id"),
-          number = id.charAt(id.length-1);
-
-      this.updateFieldVisibility(number);
+          number = id.charAt(id.length-1),
+          el1     = this.$(".field-server_url"+number),
+          el2     = this.$(".field-project"+number);
+      if (value === "") {
+        el1.slideUp();
+        el2.slideUp();
+      } else {
+        el1.slideDown();
+        el2.slideDown();
+      }
     },
 
     render: function() {
@@ -32,38 +39,29 @@
       });
       this.$el.html(this.form.render().el);
 
-      this.updateFieldVisibility(1);
-      this.updateFieldVisibility(2);
-      this.updateFieldVisibility(3);
+      this.updateOptionalFieldVisibility(1);
+      this.updateOptionalFieldVisibility(2);
+      this.updateOptionalFieldVisibility(3);
 
       return this;
     },
 
-    updateFieldVisibility: function(number) {
-      var that   = this,
-          source = this.getSourceEl(number).val();
-
-      if (source.length === 0) {
-        _.each($.Sources.ci, function(plugin) {
-          that.toggleFields(plugin, number, false);
-        });
+    updateOptionalFieldVisibility: function(number) {
+      if (this.getSourceEl(number).val() === "") {
+        this.getServerUrlFieldEl(number).hide();
+        this.getProjectFieldEl(number).hide();
       } else {
-        _.each($.Sources.ci, function(plugin) {
-          that.toggleFields(plugin, number, plugin.name === source);
-        });
+        this.getServerUrlFieldEl(number).show();
+        this.getProjectFieldEl(number).show();
       }
     },
 
-    toggleFields: function(plugin, number, show) {
-      var that = this;
-      _.each(plugin.fields, function(field) {
-        var el = that.$(".field-"+ plugin.name + "-" + field.name + number);
-        if (show === true) {
-          el.show();
-        } else {
-          el.hide();
-        }
-      });
+    getServerUrlFieldEl: function(number) {
+      return this.$(".field-server_url"+number);
+    },
+
+    getProjectFieldEl: function(number) {
+      return this.$(".field-project"+number);
     },
 
     getSourceEl: function(number) {
@@ -100,21 +98,20 @@
             if (number === 1 && value.length === 0 ) { return err; }
           }]
         };
-
-        // add extra fields as defined in source plugin
-        _.each($.Sources.ci, function(plugin) {
-          _.each(plugin.fields, function(field) {
-            result[plugin.name + "-" + field.name + number] = {
-              title: field.title + " " + number,
-              type: "Text"
-            };
-            if (field.mandatory === true) {
-              result[plugin.name + "-" + field.name + number].validators = [ function check(value, formValues) {
-                if (formValues["source" + number] === plugin.name && value.length === 0) { return err; }
-              }];
-            }
-          });
-        });
+        result["server_url" + number] = {
+          title: "Server URL " + number,
+          type: "Text",
+          validators: [ function checkServerUrl(value, formValues) {
+            if ((formValues["source" + number] === "jenkins" || formValues["source" + number] === "travis") && value.length === 0) { return err; }
+          }]
+        };
+        result["project" + number] = {
+          title: "Project " + number,
+          type: "Text",
+          validators: [ function checkServerUrl(value, formValues) {
+            if ((formValues["source" + number] === "jenkins" || formValues["source" + number] === "travis") && value.length === 0) { return err; }
+          }]
+        };
         return result;
       };
 

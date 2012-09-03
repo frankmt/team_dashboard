@@ -19,7 +19,7 @@
   views.widgets.Graph = Backbone.View.extend({
 
     initialize: function(options) {
-      _.bindAll(this, "render", "update", "renderGraph", "updateValues", "widgetChanged");
+      _.bindAll(this, "render", "update", "renderGraph", "showEmptyDatasetNotice", "updateValues", "widgetChanged");
 
       this.updateCollection();
 
@@ -135,24 +135,17 @@
       return $.when(this.collection.fetch(options)).done(this.updateValues);
     },
 
-    updateGraphSeries: function(datapoints) {
-      var that = this;
-      this.graph.series = datapoints;
-      this.graph.series.active = function() {
-        return that.graph.series.filter(function(s) {
-          return !s.disabled;
-        });
-      };
-    },
-
     updateValues: function() {
       var datapoints = this.transformDatapoints();
-      if (datapoints.hasData === true && this.graph) {
-        this.updateGraphSeries(datapoints);
-        this.graph.render();
-      } else {
+      if (datapoints.hasData === true) {
         this.renderGraph(datapoints);
+      } else {
+        // this.showEmptyDatasetNotice();
       }
+    },
+
+    showEmptyDatasetNotice: function() {
+      this.$el.html("<p class='empty-data'>No data available.</p>");
     },
 
     onClose: function() {

@@ -8,7 +8,7 @@
     },
 
     initialize: function() {
-      _.bindAll(this, "render", "sourceChanged", "showConnectionError", "showBrowseDialog");
+      _.bindAll(this, "render", "sourceChanged", "showConnectionError");
 
       this.collection = helpers.datapointsTargetsPool.get(this.model.get('source') || $.Sources.datapoints[0]);
     },
@@ -26,6 +26,7 @@
       this.$targetInput       = this.$('input#targets');
       this.$targetInputField  = this.$('.field-targets');
       this.$sourceSelect      = this.$('select#source');
+      this.$httpProxyUrlField = this.$(".field-http_proxy_url");
 
       this.updateSourceFormControls(this.$sourceSelect.val());
 
@@ -109,8 +110,18 @@
           },
           validators: ["required"]
         },
-        targets: { title: "Targets", type: 'Text', validators: [ function checkTargets(value, formValues) {
-            if (value.length === 0) { return err; }
+        http_proxy_url: {
+          title: "Proxy URL",
+          type: "Text",
+          validators: [ function checkHttpProxyUrl(value, formValues) {
+            if (formValues.source === "http_proxy" && value.length === 0) { return err; }
+          }]
+        },
+        targets: {
+          title: "Targets",
+          type: 'List',
+          validators: [ function checkTargets(value, formValues) {
+            if (formValues.source !== "http_proxy" && value.length === 0) { return err; }
           }
         ]}
       };
@@ -125,21 +136,27 @@
       var options = { suppressErrors: true },
           that    = this;
 
-      if (source.length === 0) {
+      if (source === "http_proxy") {
+        this.$targetInputField.hide();
+        this.$httpProxyUrlField.show();
+      } else if (source.length === 0) {
+        this.$targetInputField.hide();
+        this.$httpProxyUrlField.hide();
       } else {
+        this.$httpProxyUrlField.hide();
+        this.$targetInputField.show();
         if (this.collection.source !== source) {
           this.$targetInput.val("");
         }
 
         if ( $.Sources.datapoints[source].supports_target_browsing === true) {
           this.collection = helpers.datapointsTargetsPool.get(source);
-          that.$targetInput.selectable("disable");
           if (this.collection.populated === true) {
-            this.initTargetSelectable();
+            that.$targetInput.selectable({ source: that.collection.autocomplete_names() });
           } else {
             this.collection.fetch()
             .done(function() {
-              that.initTargetSelectable();
+              that.$targetInput.selectable({ source: that.collection.autocomplete_names() });
             })
             .error(this.showConnectionError);
           }
@@ -147,25 +164,6 @@
           that.$targetInput.selectable("disable");
         }
       }
-    },
-
-    initTargetSelectable: function() {
-      this.$targetInput.selectable({
-        source:           this.collection.autocomplete_names(),
-        browseCallback :  this.showBrowseDialog
-      });
-    },
-
-    showBrowseDialog: function(event) {
-      var that = this,
-          browser = new views.TargetBrowser({ targets: this.collection.toJSON() });
-      browser.on("selectionChanged", function(selection) {
-        var currentTargets = that.$targetInput.val();
-        that.$targetInput.selectable("disable");
-        that.$targetInput.val(currentTargets + "," + selection);
-        that.initTargetSelectable();
-      });
-      this.$el.append(browser.render().el);
     },
 
     showConnectionError: function() {

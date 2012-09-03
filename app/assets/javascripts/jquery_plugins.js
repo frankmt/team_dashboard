@@ -18,31 +18,22 @@
         var $input     = $result.parent().find(".selectable-input"),
             $list      = $result.parent().find(".selectable-list"),
             $remove    = $result.parent().find(".remove"),
-            $add       = $result.parent().find(".add"),
-            $browse    = $result.parent().find(".browse");
+            $add       = $result.parent().find(".add");
 
         $input.typeahead({ source: options.source });
 
         populate();
-        hideListIfEmpty();
 
         function cleanupControls() {
           $result.parent().find(".selectable-container").remove();
         }
 
-        function hideListIfEmpty() {
-          if ($result.val().length === 0) {
-            $list.hide();
-          }
-        }
-
         function createControls() {
-          var input        = "<input class='selectable-input' type='text' size='16' placeholder='Enter target to add'></input>",
-              browseButton = "<button class='btn browse' type='button'><i class='icon-search icon-white'></i></button>",
-              addButton    = "<button class='btn add' type='button'><i class='icon-plus icon-white'></i></button>",
-              inputAppend  = "<div class='input-append'>" + input + browseButton + "</div>",
-              list         = "<ul class='selectable-list input-xlarge'></ul>",
-              container    = "<div class='selectable-container'>" + inputAppend + list + "</div>";
+          var input       = "<input class='selectable-input' type='text' size='16'></input>",
+              button      = "<button class='btn add' type='button'>Add</button>",
+              inputAppend = "<div class='input-append'>" + input + button + "</div>",
+              list        = "<ul class='selectable-list input-large'></ul>",
+              container   = "<div class='selectable-container'>" + inputAppend + list + "</div>";
           $container = $(container);
           $result.after($container);
         }
@@ -58,8 +49,6 @@
         }
 
         function addItem() {
-          $list.show();
-
           var value = $input.val();
           addItemToList(value);
           updateResult();
@@ -78,7 +67,6 @@
               return $(n).clone().children().remove().end().text();
           }).get().join(",");
           $result.val(listValues);
-          hideListIfEmpty();
         }
 
         function handleKeyboardAdd(event) {
@@ -99,24 +87,21 @@
           }
         }
 
-        function handleButtonBrowse(event) {
-          if (options.browseCallback) {
-            options.browseCallback(event);
-          }
-        }
-
         $input.keyup(handleKeyboardAdd);
         $result.parent().on("click", "li > .remove", handleRemove);
         $add.on("click", handleButtonAdd);
-        $browse.on("click", handleButtonBrowse);
 
       });
     },
 
     disable : function() {
       var $result = $(this);
+
+      var $input = $(".selectable-input");
+      var $list  = $(".selectable-list");
+      $input.remove();
+      $list.remove();
       $result.show();
-      $result.parent().find(".selectable-container").remove();
     }
   };
 

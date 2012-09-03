@@ -10,10 +10,6 @@ module Sources
         false
       end
 
-      def fields
-        []
-      end
-
       def get(targets, from, to, options = {})
       end
     end
