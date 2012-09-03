@@ -4,7 +4,7 @@ gem 'rails', '~> 3.2.5'
 
 gem 'jquery-rails'
 gem 'less-rails'
-gem 'less-rails-bootstrap'
+gem 'less-rails-bootstrap', '= 2.0.13' #Filenames to be included have changed in 2.1.0"
 gem "rails-backbone"
 gem "handlebars_assets"
 
