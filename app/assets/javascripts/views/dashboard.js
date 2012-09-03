@@ -5,14 +5,13 @@
     events: {
       "click button.dashboard-delete"      : "removeDashboard",
 
-      "click .add-graph"                   : "showGraphDialog",
       "click .add-actions"                 : "showDialog",
 
       "click .widget-edit"                 : "editWidget"
     },
 
     initialize: function(options) {
-      _.bindAll(this, "render", "removeDashboard", "editWidget");
+      _.bindAll(this, "render", "removeDashboard", "editWidget", "redraw");
 
       this.model.on('change', this.render);
       this.model.on("widget:changed", this.widgetChanged);
@@ -41,7 +40,15 @@
       this.widgetsContainer = new views.WidgetsContainer({ el: this.$container, model: this.model, collection: this.collection });
       this.widgetsContainer.render();
 
+      // redraw the dashboard each hour (issue #12)
+      this.timerId = setTimeout(this.redraw, 1000*60*60);
+
       return this;
+    },
+
+    redraw: function() {
+      if (this.timerId) clearTimeout(this.timerId);
+      window.location.href = "/dashboards/"+this.model.get("id");
     },
 
     _setup_editable_header: function() {
@@ -78,14 +85,6 @@
 
       var model = new models.Widget({ dashboard_id: this.model.id, kind: kind });
       var editor = new views.WidgetEditors[className]({ model: model });
-      var dialog = new views.WidgetEditor({ editor: editor, model: model, dashboard: this.model, widgetCollection: this.collection });
-      this.$("#widget-dialog").html(dialog.render().el);
-      return false;
-    },
-
-    showGraphDialog: function(event) {
-      var model = new models.Widget({ dashboard_id: this.model.id, kind: 'graph' });
-      var editor = new views.WidgetEditors.Graph({ model: model });
       var dialog = new views.WidgetEditor({ editor: editor, model: model, dashboard: this.model, widgetCollection: this.collection });
       this.$("#widget-dialog").html(dialog.render().el);
       return false;

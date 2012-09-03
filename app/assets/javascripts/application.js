@@ -25,9 +25,10 @@
 //= require bootbox
 
 //= require d3.v2.min
-//= require rickshaw.min
+//= require rickshaw
 //= require moment.min
 //= require select2
+//= require list.min
 
 //= require backbone_extensions
 //= require app
