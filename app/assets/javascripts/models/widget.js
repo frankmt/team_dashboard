@@ -19,7 +19,7 @@
     },
 
     targetsString: function() {
-      return (this.get("targets") || "");
+      return (this.get("targets") || "").split(',');
     }
 
   });
