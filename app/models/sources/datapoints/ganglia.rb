@@ -13,11 +13,13 @@ module Sources
       end
 
       def get(targets, from, to, options = {})
+        targets = targets.reject(&:blank?)
         ganglia_datapoints = request_datapoints(targets, from, to)
         result = []
         targets.each_with_index do |target, index|
           result << { "target" => target, "datapoints" => ganglia_datapoints[index] }
         end
+        raise Sources::Datapoints::NotFoundError if result.empty?
         result
       end
 

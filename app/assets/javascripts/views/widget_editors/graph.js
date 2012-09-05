@@ -8,7 +8,7 @@
     },
 
     initialize: function() {
-      _.bindAll(this, "render", "sourceChanged", "showConnectionError");
+      _.bindAll(this, "render", "sourceChanged", "showConnectionError", "showBrowseDialog", "showFunctionDialog");
 
       this.collection = helpers.datapointsTargetsPool.get(this.model.get('source') || $.Sources.datapoints[0]);
     },
@@ -41,36 +41,6 @@
       return this.form.getValue();
     },
 
-    getUpdateIntervalOptions: function() {
-      return [
-        { val: 10, label: '10 sec' },
-        { val: 600, label: '1 min' },
-        { val: 6000, label: '10 min' },
-        { val: 36000, label: '1 hour' }
-      ];
-    },
-
-    getPeriodOptions: function() {
-      return [
-        { val: "30-minutes", label: "Last 30 minutes" },
-        { val: "60-minutes", label: "Last 60 minutes" },
-        { val: "3-hours", label: "Last 3 hours" },
-        { val: "12-hours", label: "Last 12 hours" },
-        { val: "24-hours", label: "Last 24 hours" },
-        { val: "3-days", label: "Last 3 days" },
-        { val: "7-days", label: "Last 7 days" },
-        { val: "4-weeks", label: "Last 4 weeks" }
-      ];
-    },
-
-    getAggregateOptions: function() {
-      return [
-        { val: "sum", label: 'Sum' },
-        { val: "average", label: 'Average' },
-        { val: "delta", label: 'Delta' }
-      ];
-    },
-
     getSizeOptions: function() {
       return [
         { val: 1, label: '1 Column' },
@@ -93,12 +63,12 @@
         update_interval:  {
           title: 'Update Interval',
           type: 'Select',
-          options: this.getUpdateIntervalOptions()
+          options: helpers.FormDefaults.getUpdateIntervalOptions()
         },
         range: {
           title: 'Period',
           type: 'Select',
-          options: this.getPeriodOptions()
+          options: helpers.FormDefaults.getPeriodOptions()
         },
         size: { title: "Size", type: 'Select', options: this.getSizeOptions() },
         graph_type: { title: "Graph Type", type: "Select", options: this.getGraphTypeOptions() },
@@ -161,6 +131,42 @@
           that.$targetInput.selectable("disable");
         }
       }
+    },
+
+    initTargetSelectable: function() {
+      var options = {
+        source:           this.collection.autocomplete_names(),
+        browseCallback:   this.showBrowseDialog
+      };
+
+      if ($.Sources.datapoints[this.$sourceSelect.val()].supports_functions === true) {
+        _.extend(options, { editCallback: this.showFunctionDialog });
+      }
+
+      this.$targetInput.selectable(options);
+    },
+
+    showFunctionDialog: function(target, event) {
+      var that = this,
+          dialog = new views.FunctionEditor({ target: target, collection: this.collection });
+
+      dialog.on("inputChanged", function(newValue) {
+        that.$targetInput.selectable("update", target, newValue);
+      });
+
+      this.$el.append(dialog.render().el);
+    },
+
+    showBrowseDialog: function(event) {
+      var that = this,
+          browser = new views.TargetBrowser({ targets: this.collection.toJSON() });
+      browser.on("selectionChanged", function(selection) {
+        var currentTargets = that.$targetInput.val();
+        that.$targetInput.selectable("disable");
+        that.$targetInput.val(currentTargets + "," + selection);
+        that.initTargetSelectable();
+      });
+      this.$el.append(browser.render().el);
     },
 
     showConnectionError: function() {

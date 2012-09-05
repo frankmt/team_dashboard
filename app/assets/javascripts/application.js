@@ -33,6 +33,8 @@
 //= require app
 //= require router
 //= require helpers
+//= require graphite_functions
+//= require graphite
 //= require handlebars_helpers
 //= require jquery_plugins
 //= require behaviours

@@ -51,7 +51,7 @@ module HttpService
   def request(url, options = {})
     uri = URI.parse(url)
     connection = Faraday.new(uri, options, &(faraday_middleware || DEFAULT_MIDDLEWARE))
-    connection.basic_auth(uri.user, uri.password) if uri.user && uri.password
-    connection.get(url).body
+    connection.basic_auth(CGI.unescape(uri.user), CGI.unescape(uri.password)) if uri.user && uri.password
+    connection.get.body
   end
 end

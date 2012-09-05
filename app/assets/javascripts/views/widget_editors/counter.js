@@ -58,28 +58,6 @@
       return sources;
     },
 
-    getUpdateIntervalOptions: function() {
-      return [
-        { val: 10, label: '10 sec' },
-        { val: 600, label: '1 min' },
-        { val: 6000, label: '10 min' },
-        { val: 36000, label: '1 hour' }
-      ];
-    },
-
-    getPeriodOptions: function() {
-      return [
-        { val: "30-minutes", label: "Last 30 minutes" },
-        { val: "60-minutes", label: "Last 60 minutes" },
-        { val: "3-hours", label: "Last 3 hours" },
-        { val: "12-hours", label: "Last 12 hours" },
-        { val: "24-hours", label: "Last 24 hours" },
-        { val: "3-days", label: "Last 3 days" },
-        { val: "7-days", label: "Last 7 days" },
-        { val: "4-weeks", label: "Last 4 weeks" }
-      ];
-    },
-
     getAggregateOptions: function() {
       return [
         { val: "sum", label: 'Sum' },
@@ -116,7 +94,7 @@
           title: "Targets " + number,
           type: 'Text',
           validators: [ function(value, formValues) {
-            if (formValues["source" + number].length > 0 && formValues.source1 !== "http_proxy" && value.length === 0) { return err; }
+            if (value.length === 0 && formValues["source"+number].length > 0) { return err; }
           }]
         };
         result["aggregate_function" + number] = {
@@ -132,12 +110,12 @@
         update_interval:  {
           title: 'Update Interval',
           type: 'Select',
-          options: this.getUpdateIntervalOptions()
+          options: helpers.FormDefaults.getUpdateIntervalOptions()
         },
         range: {
           title: 'Period',
           type: 'Select',
-          options: this.getPeriodOptions()
+          options: helpers.FormDefaults.getPeriodOptions()
         }
       };
 
@@ -162,22 +140,13 @@
           targetInput            = this["$targetInput" + number],
           metrics                = this["metricsCollection" + number];
 
-      var sourceSupportsTarget   = function() {
-        return (source === "demo" || source === "graphite");
-      };
-
-      if (source === "http_proxy") {
-        httpProxyUrlField.show();
-        targetInputField.hide();
-        aggregateFunctionField.hide();
-      } else if (source.length === 0) {
-        httpProxyUrlField.hide();
+      if (source.length === 0) {
         targetInputField.hide();
         aggregateFunctionField.hide();
       } else {
-        httpProxyUrlField.hide();
         targetInputField.show();
         aggregateFunctionField.show();
+
         if (metrics.source !== source) {
           targetInput.val("");
         }
@@ -204,6 +173,44 @@
           }, this))
           .error(this.showConnectionError);
       }
+    },
+
+    initTargetSelectable: function(number, collection) {
+      var that = this;
+      var options = {
+        source:           collection.autocomplete_names(),
+        browseCallback :  function(event) {
+          var browser = new views.TargetBrowser({ targets: collection.toJSON() });
+
+          browser.on("selectionChanged", function(selection) {
+            var $input         = that["$targetInput" + number],
+                currentTargets = $input.val(),
+                source         = that["$sourceSelect" + number].val();
+            $input.selectable("disable");
+            $input.val(currentTargets + "," + selection);
+            that.initTargetSelectable(number, helpers.datapointsTargetsPool.get(source));
+          });
+
+          that.$el.append(browser.render().el);
+        }
+      };
+
+      if ($.Sources.datapoints[that["$sourceSelect" + number].val()].supports_functions === true) {
+        _.extend(options, {
+          editCallback: function(target, event) {
+            var dialog = new views.FunctionEditor({ target: target, collection: collection });
+
+            dialog.on("inputChanged", function(newValue) {
+              var $input = that["$targetInput" + number];
+              $input.selectable("update", target, newValue);
+            });
+
+            that.$el.append(dialog.render().el);
+          }
+        });
+      }
+
+      this["$targetInput" + number].selectable(options);
     },
 
     showConnectionError: function() {
